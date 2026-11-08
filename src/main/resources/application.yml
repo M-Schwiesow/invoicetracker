@@ -3,8 +3,8 @@ spring:
         name: invoicetracker
     datasource:
         url: jdbc:postgresql://localhost:5432/invoice_tracker
-        password: postgres #oof this needs an external config store
-        username: postgres #same
+        password: ${PSQL_PASSWORD}
+        username: ${PSQL_USERNAME}
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         generate-ddl: true
@@ -19,3 +19,4 @@ spring:
     sql:
         init:
             mode: never
+            continue-on-error: false
