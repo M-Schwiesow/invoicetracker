@@ -1,22 +1,9 @@
 spring:
-    application:
-        name: invoicetracker
+    profiles:
+        active: @spring.profiles.active@
     datasource:
-        url: jdbc:postgresql://localhost:5432/invoice_tracker
         password: ${PSQL_PASSWORD}
         username: ${PSQL_USERNAME}
-    jpa:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-        generate-ddl: true
-        show-sql: true # remove in future
-        hibernate:
-            ddl-auto: update
-        properties:
-            hibernate:
-                globally_quoted_identifiers: true
-                dialect: org.hibernate.dialect.PostgreSQLDialect
-                format_sql: true
-    sql:
-        init:
-            mode: never
-            continue-on-error: false
+application:
+    title: Invoice Tracker API
+    version: v0.01

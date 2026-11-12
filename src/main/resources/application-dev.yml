@@ -1,0 +1,20 @@
+spring:
+    application:
+        name: invoicetracker
+    datasource:
+        url: jdbc:postgresql://localhost:5432/invoice_tracker
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        generate-ddl: true
+        show-sql: true # remove in future
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                globally_quoted_identifiers: true
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+                format_sql: true
+    sql:
+        init:
+            mode: never
+            continue-on-error: false
