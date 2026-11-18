@@ -3,3 +3,9 @@ variables:
   - name: baseUrl
     value: http://localhost:8080
     description: Base URL for the invoice tracker service
+  - secret: true
+    name: user_email
+    description: ""
+  - secret: true
+    name: user_password
+    description: ""

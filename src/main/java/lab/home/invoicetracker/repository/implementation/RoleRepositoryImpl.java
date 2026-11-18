@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -70,8 +69,13 @@ public class RoleRepositoryImpl implements RoleRepository<Role> {
 
     @Override
     public Role getRoleByUserId(Long userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getRoleByUserId'");
+        try {
+            return jdbcTemplate.queryForObject(SELECT_ROLE_BY_USER_ID_QUERY, Map.of("userId", userId), new RoleRowMapper());
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            log.error("Error in RoleRepository.getRoleByUserId: {}", exception.getMessage());
+            throw new ApiException("An error occured.  Please try again.");
+        }
     }
 
     @Override

@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,6 +23,7 @@ import lab.home.invoicetracker.model.Role;
 import lab.home.invoicetracker.model.User;
 import lab.home.invoicetracker.repository.RoleRepository;
 import lab.home.invoicetracker.repository.UserRepository;
+import lab.home.invoicetracker.repository.rowmapper.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +34,7 @@ public class UserRepositoryImpl implements UserRepository<User> {
     
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleRepository<Role> roleRepository;
-    // private final BCryptPasswordEncoder encoder;
+    private final BCryptPasswordEncoder encoder;
 
     @Override
     public User create(User user) {
@@ -73,8 +74,7 @@ public class UserRepositoryImpl implements UserRepository<User> {
             .addValue("firstName", user.getFirstName())
             .addValue("lastName", user.getLastName())
             .addValue("email", user.getEmail())
-            .addValue("password", user.getPassword() + "totallysecure");
-            // .addValue("password", encoder.encode(user.getPassword()));
+            .addValue("password", encoder.encode(user.getPassword()));
 
     }
 
@@ -108,6 +108,20 @@ public class UserRepositoryImpl implements UserRepository<User> {
 
     private String getVerificationUrl(String key, String type) {
         return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();
+    }
+
+    @Override 
+    public User getUserByEmail(String email) {
+        log.debug("UserRepositoryImpl.getUserByEmail called with email: {}", email);
+        try {
+            User user = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY, Map.of("email", email), new UserRowMapper());
+
+            log.debug("UserRepositoryImpl.getUserByEmail returning with userId: {}", user.getId());
+            return user;
+        } catch (Exception exception) {
+            log.error("Exception getting user by email: {}", exception.getMessage());
+            throw new ApiException("Error in getUserByEmail");
+        }
     }
     
 }

@@ -7,12 +7,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.SuperBuilder;
 
 @Data 
-@SuperBuilder 
+@Builder 
 @NoArgsConstructor 
 @AllArgsConstructor 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
@@ -34,5 +34,6 @@ public class User {
     private Boolean enabled;
     private Boolean isNotLocked;
     private Boolean isUsingMfa;
+    private String imageUrl;
     private LocalDateTime createdAt;
 }
