@@ -50,11 +50,27 @@ public class UserResource {
         log.info("login attempt with email {} and password {} (i am so secure right now)", loginForm.getEmail(), loginForm.getPassword());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword()));
         UserDTO userDTO = userService.getUserByEmail(loginForm.getEmail());
+        return userDTO.getIsUsingMfa() ? sendVerificationCode(userDTO) : sendResponse(userDTO);
+    }
+
+    private ResponseEntity<HttpResponse> sendResponse(UserDTO userDTO) {
         return ResponseEntity.ok()
             .body(HttpResponse.builder()
                 .timeStamp(LocalDateTime.now().toString())
                 .data(Map.of("user", userDTO))
                 .message("user logged in")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build());
+    }
+
+    private ResponseEntity<HttpResponse> sendVerificationCode(UserDTO userDTO) {
+        userService.sendVerificationCode(userDTO);
+        return ResponseEntity.ok()
+            .body(HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .data(Map.of("user", userDTO))
+                .message("Verification code sent.")
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .build());

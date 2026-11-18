@@ -2,13 +2,18 @@ package lab.home.invoicetracker.repository.implementation;
 
 import static java.util.Objects.requireNonNull;
 import static lab.home.invoicetracker.query.UserQuery.*;
+import static lab.home.invoicetracker.query.TwoFactorAuthQuery.*;
 import static lab.home.invoicetracker.enumeration.RoleType.*;
 import static lab.home.invoicetracker.enumeration.VerificationType.*;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -18,12 +23,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import lab.home.invoicetracker.dto.UserDTO;
 import lab.home.invoicetracker.exception.ApiException;
 import lab.home.invoicetracker.model.Role;
 import lab.home.invoicetracker.model.User;
 import lab.home.invoicetracker.repository.RoleRepository;
 import lab.home.invoicetracker.repository.UserRepository;
 import lab.home.invoicetracker.repository.rowmapper.UserRowMapper;
+import lab.home.invoicetracker.util.SmsUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j 
 public class UserRepositoryImpl implements UserRepository<User> {
     
+    private static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleRepository<Role> roleRepository;
     private final BCryptPasswordEncoder encoder;
@@ -123,5 +131,17 @@ public class UserRepositoryImpl implements UserRepository<User> {
             throw new ApiException("Error in getUserByEmail");
         }
     }
-    
+
+    @Override
+    public void sendVerificationCode(UserDTO userDTO) {
+        String expirationDate = DateFormatUtils.format(DateUtils.addDays(new Date(), 1), DATE_FORMAT);
+        String verificationCode = RandomStringUtils.secure().nextAlphabetic(8);
+        try {
+            jdbcTemplate.update(DELETE_TWO_FACTOR_CODE_BY_USER_ID, Map.of("id", userDTO.getId()));
+            jdbcTemplate.update(INSERT_TWO_FACTOR_CODE, Map.of("userId", userDTO.getId(), "code", verificationCode, "expirationDate", expirationDate));
+            SmsUtils.sendSMS(userDTO.getPhone(), "From: Invoice Tracker \nVerification Code\n" + verificationCode);
+        } catch (Exception exception) {
+            log.error("oh no! {}", exception.getMessage());
+        }
+    }
 }

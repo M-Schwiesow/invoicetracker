@@ -2,6 +2,7 @@ package lab.home.invoicetracker.repository;
 
 import java.util.Collection;
 
+import lab.home.invoicetracker.dto.UserDTO;
 import lab.home.invoicetracker.model.User;
 
 public interface UserRepository<T extends User> {
@@ -14,4 +15,5 @@ public interface UserRepository<T extends User> {
 
     // more operations to follow
     User getUserByEmail(String email);
+    void sendVerificationCode(UserDTO userDTO);
 }
